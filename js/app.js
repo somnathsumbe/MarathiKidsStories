@@ -27,7 +27,7 @@ function loadState() {
     return { ...DEFAULT_STATE, ...saved, audio: { ...DEFAULT_STATE.audio, ...(saved.audio || {}) }, audioProgress: { ...(saved.audioProgress || {}) } };
   } catch { return { ...DEFAULT_STATE, audio: { ...DEFAULT_STATE.audio }, audioProgress: {} }; }
 }
-function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch { /* Continue without persistence when storage is blocked. */ } }
 function getStory(id) { return stories.find((story) => Number(story.id) === Number(id)) || stories[0]; }
 function isSaved(id) { return state.savedStories.includes(Number(id)); }
 function isRead(id) { return state.readStories.includes(Number(id)); }
@@ -122,9 +122,17 @@ function openStory(id, listen = false) { stopSpeech(); currentStoryId = Number(i
 function toggleTheme() { setTheme(state.theme === 'dark' ? 'reading' : 'dark'); }
 async function initializeApp() {
   state = loadState(); state.theme = state.theme || (state.darkMode ? 'dark' : 'reading'); document.documentElement.dataset.theme = state.theme;
-  const response = await fetch('./data/stories.json'); const loaded = await response.json(); stories = loaded.filter((story, index, list) => list.findIndex((item) => Number(item.id) === Number(story.id)) === index).slice(0, 150);
-  if (!getStory(state.lastStory)) state.lastStory = stories[0].id;
-  loadVoices(); renderCurrentView(); if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+  try {
+    const response = await fetch('./data/stories.json'); if (!response.ok) throw new Error('stories unavailable');
+    const loaded = await response.json(); if (!Array.isArray(loaded)) throw new Error('invalid stories');
+    stories = loaded.filter((story, index, list) => list.findIndex((item) => Number(item.id) === Number(story.id)) === index).slice(0, 150);
+    if (!stories.length) throw new Error('empty stories');
+    if (!getStory(state.lastStory)) state.lastStory = stories[0].id;
+    loadVoices(); renderCurrentView();
+  } catch {
+    document.getElementById('app').innerHTML = '<main class="page-shell"><section class="empty-state"><h1>कथा उघडता आली नाही</h1><p>कृपया internet connection तपासा आणि page पुन्हा उघडा.</p><button type="button" class="button button-primary" onclick="location.reload()">पुन्हा प्रयत्न करा</button></section></main>';
+  }
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 window.showPage = showPage; window.openStory = openStory; window.toggleSave = toggleSave; window.toggleTheme = toggleTheme; window.setFilter = setFilter; window.playStory = playStory; window.pauseSpeech = pauseSpeech; window.resumeSpeech = resumeSpeech; window.stopSpeech = stopSpeech; window.previousSegment = previousSegment; window.nextSegment = nextSegment; window.setVolume = setVolume; window.setReadAlong = setReadAlong; window.setSpeed = setSpeed; window.setFontSize = setFontSize; window.setTheme = setTheme;
 window.addEventListener('popstate', renderCurrentView); window.addEventListener('beforeunload', saveAudioProgress); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveAudioProgress(); });

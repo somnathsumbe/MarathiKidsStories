@@ -2,22 +2,24 @@
 <html lang="mr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#d95d39" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="मराठी गोष्टी" />
     <meta name="description" content="गोष्टींचं सुंदर जग - मराठी मुलांसाठी गोष्टी, बोध आणि वाचन आनंद." />
     <title>शिवाजी महाराजांच्या प्रेरणादायी कथा</title>
 
     <link rel="manifest" href="./manifest.json" />
     <link rel="icon" href="./icons/icon-192.png" type="image/png" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="apple-touch-icon" href="./icons/icon-192.png" />
 
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
       :root { --ink:#24313a; --muted:#68757a; --paper:#fffaf0; --surface:#fff; --line:#eadfce; --saffron:#d95d39; --teal:#147d78; --gold:#f2b84b; --shadow:0 18px 40px rgba(101,65,37,.10); }
       :root[data-theme="light"] { --paper:#f7f9f8; --surface:#fff; --line:#dfe8e5; --ink:#203238; }
       :root[data-theme="dark"] { --paper:#182325; --surface:#213033; --line:#3a4b4e; --ink:#f5efe3; --muted:#b8c6c4; --shadow:0 18px 40px rgba(0,0,0,.22); }
       * { box-sizing:border-box; }
-      html, body { margin:0; min-height:100%; background:var(--paper); color:var(--ink); font-family:'Noto Sans Devanagari', sans-serif; }
+      html, body { margin:0; min-height:100%; background:var(--paper); color:var(--ink); font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
       body { padding-bottom:76px; }
       button, input { font:inherit; }
       button { cursor:pointer; }
@@ -25,7 +27,7 @@
       .page-shell { padding:34px 0 50px; }
       .eyebrow, .section-kicker { color:var(--saffron); font-size:.84rem; font-weight:700; letter-spacing:.03em; }
       h1, h2, p { margin-top:0; }
-      h1, h2 { font-family:'Baloo 2','Noto Sans Devanagari',sans-serif; line-height:1.12; }
+      h1, h2 { font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height:1.12; }
       .button { border:0; border-radius:14px; min-height:48px; padding:10px 18px; font-weight:700; transition:transform .18s, box-shadow .18s; }
       .button:hover { transform:translateY(-2px); box-shadow:0 8px 18px rgba(0,0,0,.12); }
       .button-primary { background:var(--saffron); color:#fff; }
@@ -66,6 +68,7 @@
       .complete-badge { color:var(--teal); font-size:.85rem; font-weight:700; margin-bottom:12px; }
       .story-card-actions { margin-top:auto; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
       .story-card-actions .button { flex:1; padding-inline:10px; }
+      .row { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:24px; }
       .empty-state { padding:50px; text-align:center; color:var(--muted); }
       .reader-page { min-height:100vh; padding:24px 0 70px; background:var(--paper); }
       .reader-top { width:min(900px, calc(100% - 32px)); margin:0 auto 24px; display:flex; justify-content:space-between; align-items:center; }
@@ -110,17 +113,31 @@
       .completion-card h2 { margin:8px 0; font-size:2rem; }
       .story-navigation { display:flex; gap:14px; max-width:800px; margin:35px auto 0; }
       .story-navigation .button { flex:1; }
-      .bottom-nav { position:fixed; left:0; right:0; bottom:0; z-index:50; background:var(--surface); border-top:1px solid var(--line); box-shadow:0 -8px 24px rgba(42,35,25,.08); }
+      .bottom-nav { position:fixed; left:0; right:0; bottom:0; z-index:50; padding-bottom:env(safe-area-inset-bottom); background:var(--surface); border-top:1px solid var(--line); box-shadow:0 -8px 24px rgba(42,35,25,.08); }
       .bottom-nav-inner { width:min(560px, 100%); margin:auto; display:grid; grid-template-columns:repeat(3, 1fr); }
       .nav-button { min-height:68px; color:var(--ink); border:0; background:transparent; font-size:.8rem; }
       .nav-button div:first-child { font-size:1.25rem; margin-bottom:2px; }
-      @media (max-width:700px) { .page-shell, .reader-content { width:min(100% - 24px, 800px); } .page-shell { padding-top:20px; } .hero { min-height:0; padding:34px 24px; border-radius:22px; } .hero-emblem { font-size:5rem; align-self:flex-start; } .hero-stats { display:block; } .hero-stats span { display:block; border:0; margin:6px 0; } .continue-section, .story-tools { display:block; } .continue-section .button { margin-top:18px; width:100%; } .search-box { margin-bottom:14px; max-width:none; } .page-heading h1 { font-size:2rem; } .audio-panel { padding:18px; } .reader-controls { align-items:flex-start; } .story-navigation { flex-direction:column; } .reader-medium p { font-size:1.18rem; } }
+      .install-banner { position:fixed; z-index:100; left:12px; right:12px; bottom:calc(76px + env(safe-area-inset-bottom)); display:flex; align-items:flex-start; gap:12px; padding:16px; padding-bottom:calc(16px + env(safe-area-inset-bottom)); border:1px solid var(--line); border-radius:18px; background:var(--surface); color:var(--ink); box-shadow:0 18px 45px rgba(0,0,0,.2); transform:translateY(calc(120% + env(safe-area-inset-bottom))); opacity:0; transition:transform .22s ease, opacity .22s ease; }
+      .install-banner.is-visible { transform:translateY(0); opacity:1; }
+      .install-banner-icon { font-size:2rem; line-height:1; }
+      .install-banner-copy { flex:1; min-width:0; }
+      .install-banner h2 { margin:0 0 4px; font-size:1.1rem; }
+      .install-banner p { margin:0; color:var(--muted); font-size:.88rem; line-height:1.45; }
+      .install-banner details { margin-top:8px; color:var(--muted); font-size:.84rem; }
+      .install-banner ol { margin:7px 0 0; padding-left:20px; line-height:1.7; }
+      .install-actions { display:flex; gap:8px; margin-top:12px; align-items:center; }
+      .install-button, .install-later, .install-close { min-height:44px; border-radius:10px; font-weight:700; }
+      .install-button { border:0; padding:8px 14px; background:var(--saffron); color:#fff; }
+      .install-later { border:1px solid var(--line); padding:8px 14px; background:transparent; color:var(--ink); }
+      .install-close { border:0; padding:0 10px; background:transparent; color:var(--muted); font-size:1.5rem; line-height:1; }
+      @media (min-width:701px) { .install-banner { left:auto; width:min(390px, calc(100% - 24px)); } }
+      @media (max-width:1000px) { .row { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
+      @media (max-width:700px) { .row { grid-template-columns:1fr; } .page-shell, .reader-content { width:min(100% - 24px, 800px); } .page-shell { padding-top:20px; } .hero { min-height:0; padding:34px 24px; border-radius:22px; } .hero-emblem { font-size:5rem; align-self:flex-start; } .hero-stats { display:block; } .hero-stats span { display:block; border:0; margin:6px 0; } .continue-section, .story-tools { display:block; } .continue-section .button { margin-top:18px; width:100%; } .search-box { margin-bottom:14px; max-width:none; } .page-heading h1 { font-size:2rem; } .audio-panel { padding:18px; } .reader-controls { align-items:flex-start; } .story-navigation { flex-direction:column; } .reader-medium p { font-size:1.18rem; } }
     </style>
   </head>
 
-  <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased">
-    <div id="networkStatus" class="fixed top-4 right-4 z-50 rounded-full bg-emerald-500 text-white px-3 py-1 text-xs shadow hidden"></div>
-    <div id="app" class="min-h-screen pb-24"></div>
+  <body>
+    <div id="app"></div>
 
     <nav class="bottom-nav">
       <div class="bottom-nav-inner">
@@ -141,6 +158,7 @@
       </div>
     </nav>
 
-    <script src="./js/app.js"></script>
+    <script src="./js/pwa-install.js" defer></script>
+    <script src="./js/app.js" defer></script>
   </body>
 </html>
