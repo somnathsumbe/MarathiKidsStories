@@ -20,12 +20,18 @@
       :root[data-theme="light"] { --paper:#f7f9f8; --surface:#fff; --line:#dfe8e5; --ink:#203238; }
       :root[data-theme="dark"] { --paper:#182325; --surface:#213033; --line:#3a4b4e; --ink:#f5efe3; --muted:#b8c6c4; --shadow:0 18px 40px rgba(0,0,0,.22); }
       * { box-sizing:border-box; }
-      html, body { margin:0; min-height:100%; background:var(--paper); color:var(--ink); font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-      body { padding-bottom:76px; }
+      html, body { margin:0; min-height:100%; overflow-x:hidden; background:var(--paper); color:var(--ink); font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      body { min-height:100dvh; padding:calc(64px + env(safe-area-inset-top)) 0 calc(88px + env(safe-area-inset-bottom)); }
       button, input { font:inherit; }
       button { cursor:pointer; }
-      .page-shell, .reader-content { width:min(1120px, calc(100% - 32px)); margin:auto; }
-      .page-shell { padding:34px 0 50px; }
+      .page-shell, .reader-content { width:min(520px, calc(100% - 24px)); margin:auto; }
+      .page-shell { padding:24px 0 40px; }
+      .app-header { position:fixed; z-index:60; top:0; left:0; right:0; min-height:64px; padding:env(safe-area-inset-top) max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left)); display:flex; align-items:center; background:var(--surface); border-bottom:1px solid var(--line); backdrop-filter:blur(14px); }
+      @supports (background:color-mix(in srgb, white, black)) { .app-header { background:color-mix(in srgb, var(--surface) 94%, transparent); } }
+      .app-header-inner { width:min(520px, 100%); min-height:64px; margin:auto; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+      .app-header-title { display:flex; align-items:center; gap:8px; font-weight:800; color:var(--ink); }
+      .app-header-title small { display:block; color:var(--muted); font-size:.7rem; font-weight:500; }
+      .header-action { min-width:44px; min-height:44px; border:0; border-radius:14px; color:var(--ink); background:transparent; font-size:1.25rem; }
       .eyebrow, .section-kicker { color:var(--saffron); font-size:.84rem; font-weight:700; letter-spacing:.03em; }
       h1, h2, p { margin-top:0; }
       h1, h2 { font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height:1.12; }
@@ -35,8 +41,8 @@
       .button-secondary { background:#e3f2ed; color:#176d68; }
       .button-light { background:#fff4d7; color:#9c452d; }
       .button-outline { background:transparent; color:var(--ink); border:1px solid var(--line); }
-      .hero { min-height:430px; padding:54px clamp(26px, 6vw, 80px); border-radius:30px; color:#fff; display:flex; align-items:center; justify-content:space-between; overflow:hidden; background:radial-gradient(circle at 85% 15%, rgba(242,184,75,.55), transparent 30%), linear-gradient(125deg,#b74732 0%,#d95d39 50%,#147d78 130%); box-shadow:var(--shadow); }
-      .hero h1 { margin:12px 0 16px; font-size:clamp(2.4rem, 6vw, 5.2rem); }
+      .hero { min-height:360px; padding:32px 24px; border-radius:26px; color:#fff; display:flex; align-items:center; justify-content:space-between; overflow:hidden; background:radial-gradient(circle at 85% 15%, rgba(242,184,75,.55), transparent 30%), linear-gradient(125deg,#b74732 0%,#d95d39 50%,#147d78 130%); box-shadow:var(--shadow); }
+      .hero h1 { margin:12px 0 16px; font-size:clamp(2.2rem, 6vw, 3.6rem); }
       .hero h1 em { color:#ffe2a3; font-style:normal; }
       .hero-copy > p { font-size:1.2rem; margin-bottom:25px; }
       .hero-stats { display:flex; flex-wrap:wrap; gap:13px; margin-bottom:28px; color:#ffe8ca; font-size:.9rem; }
@@ -71,7 +77,7 @@
       .story-card-actions .button { flex:1; padding-inline:10px; }
       .row { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:24px; }
       .empty-state { padding:50px; text-align:center; color:var(--muted); }
-      .reader-page { min-height:100vh; padding:24px 0 70px; background:var(--paper); }
+      .reader-page { min-height:100dvh; padding:18px 0 70px; background:var(--paper); }
       .reader-top { width:min(900px, calc(100% - 32px)); margin:0 auto 24px; display:flex; justify-content:space-between; align-items:center; }
       .back-button { border:0; background:transparent; color:var(--ink); font-weight:700; min-height:48px; }
       .story-count { color:var(--muted); font-weight:700; }
@@ -122,10 +128,12 @@
       .completion-card h2 { margin:8px 0; font-size:2rem; }
       .story-navigation { display:flex; gap:14px; max-width:800px; margin:35px auto 0; }
       .story-navigation .button { flex:1; }
-      .bottom-nav { position:fixed; left:0; right:0; bottom:0; z-index:50; padding-bottom:env(safe-area-inset-bottom); background:var(--surface); border-top:1px solid var(--line); box-shadow:0 -8px 24px rgba(42,35,25,.08); }
-      .bottom-nav-inner { width:min(560px, 100%); margin:auto; display:grid; grid-template-columns:repeat(3, 1fr); }
+      .bottom-nav { position:fixed; left:0; right:0; bottom:0; z-index:50; padding:6px max(8px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(8px, env(safe-area-inset-left)); background:var(--surface); border-top:1px solid var(--line); box-shadow:0 -8px 24px rgba(42,35,25,.08); }
+      .bottom-nav-inner { width:min(520px, 100%); margin:auto; display:grid; grid-template-columns:repeat(4, 1fr); }
       .nav-button { min-height:68px; color:var(--ink); border:0; background:transparent; font-size:.8rem; }
       .nav-button div:first-child { font-size:1.25rem; margin-bottom:2px; }
+      .nav-button.active { color:var(--saffron); font-weight:800; }
+      .nav-button.active div:first-child { transform:translateY(-2px); }
       .install-banner { position:fixed; z-index:100; left:12px; right:12px; bottom:calc(76px + env(safe-area-inset-bottom)); display:flex; align-items:flex-start; gap:12px; padding:16px; padding-bottom:calc(16px + env(safe-area-inset-bottom)); border:1px solid var(--line); border-radius:18px; background:var(--surface); color:var(--ink); box-shadow:0 18px 45px rgba(0,0,0,.2); transform:translateY(calc(120% + env(safe-area-inset-bottom))); opacity:0; transition:transform .22s ease, opacity .22s ease; }
       .install-banner.is-visible { transform:translateY(0); opacity:1; }
       .install-banner-icon { font-size:2rem; line-height:1; }
@@ -140,12 +148,25 @@
       .install-later { border:1px solid var(--line); padding:8px 14px; background:transparent; color:var(--ink); }
       .install-close { border:0; padding:0 10px; background:transparent; color:var(--muted); font-size:1.5rem; line-height:1; }
       @media (min-width:701px) { .install-banner { left:auto; width:min(390px, calc(100% - 24px)); } }
-      @media (max-width:1000px) { .row { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
-      @media (max-width:700px) { .row { grid-template-columns:1fr; } .page-shell, .reader-content { width:min(100% - 24px, 800px); } .page-shell { padding-top:20px; } .hero { min-height:0; padding:34px 24px; border-radius:22px; } .hero-emblem { font-size:5rem; align-self:flex-start; } .hero-stats { display:block; } .hero-stats span { display:block; border:0; margin:6px 0; } .continue-section, .story-tools { display:block; } .continue-section .button { margin-top:18px; width:100%; } .search-box { margin-bottom:14px; max-width:none; } .page-heading h1 { font-size:2rem; } .audio-panel { padding:18px; } .reader-controls { align-items:flex-start; } .story-navigation { flex-direction:column; } .reader-medium p { font-size:1.18rem; } }
+      @media (min-width:701px) { .row { grid-template-columns:1fr; } }
+      .home-greeting, .home-categories { margin-bottom:18px; }
+      .home-greeting h2 { margin:4px 0; font-size:1.55rem; }
+      .home-greeting p { color:var(--muted); margin:0; }
+      .home-category-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; }
+      .home-category { min-height:68px; padding:12px; text-align:left; border:1px solid var(--line); border-radius:16px; background:var(--surface); color:var(--ink); font-weight:700; box-shadow:0 8px 18px rgba(101,65,37,.06); }
+      .home-category span { display:block; color:var(--teal); font-size:.75rem; margin-top:3px; }
+      @media (max-width:700px) { .page-shell, .reader-content { width:min(100% - 24px, 520px); } .hero { min-height:0; padding:30px 20px; border-radius:22px; } .hero-emblem { font-size:5rem; align-self:flex-start; } .hero-stats { display:block; } .hero-stats span { display:block; border:0; margin:6px 0; } .continue-section, .story-tools { display:block; } .continue-section .button { margin-top:18px; width:100%; } .search-box { margin-bottom:14px; max-width:none; } .page-heading h1 { font-size:2rem; } .audio-panel { position:sticky; top:72px; z-index:20; padding:18px; } .reader-controls { align-items:flex-start; } .story-navigation { flex-direction:column; } .reader-medium p { font-size:1.18rem; } }
     </style>
   </head>
 
   <body>
+    <header class="app-header">
+      <div class="app-header-inner">
+        <button type="button" onclick="showPage('home')" class="header-action" aria-label="मुख्यपृष्ठ उघडा">☰</button>
+        <button type="button" onclick="showPage('home')" class="app-header-title" aria-label="मराठी गोष्टी मुख्यपृष्ठ">🚩 <span>मराठी गोष्टी<small>शिका · वाचा · ऐका</small></span></button>
+        <button type="button" onclick="showPage('stories')" class="header-action" aria-label="कथा निवडा">🔊</button>
+      </div>
+    </header>
     <div id="app"></div>
 
     <nav class="bottom-nav">
@@ -156,18 +177,24 @@
         </button>
 
         <button type="button" onclick="showPage('stories')" class="nav-button">
-          <div>📖</div>
+          <div>📚</div>
           <div>गोष्टी</div>
         </button>
 
         <button type="button" onclick="showPage('saved')" class="nav-button">
-          <div>❤️</div>
-          <div>माझ्या गोष्टी</div>
+          <div>🔖</div>
+          <div>जतन केले</div>
+        </button>
+
+        <button type="button" onclick="toggleTheme()" class="nav-button">
+          <div>⚙️</div>
+          <div>अधिक</div>
         </button>
       </div>
     </nav>
 
-    <script src="./js/pwa-install.js" defer></script>
-    <script src="./js/app.js" defer></script>
+    <script src="./js/pwa-install.js?v=11" defer></script>
+    <script src="./js/audio/speechEngine.js?v=11" defer></script>
+    <script src="./js/app.js?v=11" defer></script>
   </body>
 </html>

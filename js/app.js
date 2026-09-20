@@ -42,15 +42,13 @@ function categoryMatches(story, filter) {
 function filteredStories() { const term = currentSearch.toLowerCase(); return stories.filter((story) => categoryMatches(story, currentFilter) && (!term || `${story.title} ${story.category}`.toLowerCase().includes(term))); }
 function loadVoices() {
   voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-  const marathi = voices.filter((voice) => (voice.lang || '').toLowerCase().startsWith('mr'));
-  const maleMarathi = marathi.filter((voice) => /male|man|पुरुष|वक्ता/i.test(`${voice.name} ${voice.voiceURI}`));
-  const indian = voices.filter((voice) => /^(hi|en|gu|kn|ta|te)-in/i.test(voice.lang || ''));
-  selectedVoice = voices.find((voice) => voice.name === state.audio.voice) || maleMarathi[0] || marathi[0] || indian[0] || voices[0] || null;
-  hasMarathiVoice = Boolean(marathi.length);
+  const selection = window.MarathiSpeechEngine?.findVoice(voices, state.audio.voice) || { voice: voices[0] || null, hasMarathiVoice: false };
+  selectedVoice = selection.voice;
+  hasMarathiVoice = selection.hasMarathiVoice;
   voiceMessage = selectedVoice && !hasMarathiVoice ? 'या device/browser मध्ये थेट मराठी आवाज उपलब्ध नाही; उपलब्ध Indian voice वापरला जात आहे.' : (!selectedVoice ? 'या device/browser मध्ये आवाज उपलब्ध नाही.' : '');
   if (selectedVoice && state.audio.voice !== selectedVoice.name) { state.audio.voice = selectedVoice.name; saveState(); }
 }
-function splitStory(text) { return (text.match(/[^।!?]+[।!?]?/g) || [text]).map((sentence) => sentence.trim()).filter(Boolean); }
+function splitStory(text) { return window.MarathiSpeechEngine?.split(text) || [String(text).trim()]; }
 function prepareSpeech() {
   const story = getStory(currentStoryId);
   segments = [{ text: story.title, type: 'title', paragraphIndex: -1, sentenceIndex: -1 }];
@@ -107,6 +105,10 @@ function scrollActiveParagraph() {
 function setSpeed(speed) { const current = segmentIndex; state.audio.speed = speed; saveState(); if (!speechStopped) { stopSpeech(); segmentIndex = current; speakSegment(segmentIndex); } else renderReader(currentStoryId, true); }
 function setFontSize(size) { state.fontSize = size; saveState(); renderReader(currentStoryId, true); }
 function setTheme(theme) { state.theme = theme; state.darkMode = theme === 'dark'; document.documentElement.dataset.theme = theme; saveState(); renderCurrentView(); }
+function syncNavigation() {
+  const page = new URLSearchParams(location.search).has('story') ? 'reader' : location.hash === '#saved' ? 'saved' : location.hash === '#stories' ? 'stories' : 'home';
+  document.querySelectorAll('.nav-button').forEach((button, index) => button.classList.toggle('active', page === ['home', 'stories', 'saved', 'more'][index]));
+}
 
 function storyCard(story) {
   return `<div class="col-12 col-sm-6 col-lg-4"><article class="story-card h-100"><div class="story-card-icon">${story.icon}</div><span class="story-category">${story.category}</span><h2>${story.title}</h2><p class="story-meta">📖 ${story.readTime} मिनिटे</p>${isRead(story.id) ? '<span class="complete-badge">✓ कथा पूर्ण</span>' : ''}<div class="story-card-actions"><button type="button" onclick="toggleSave(${story.id})" class="icon-button" aria-label="कथा आवडती करा">${isSaved(story.id) ? '♥' : '♡'}</button><button type="button" onclick="openStory(${story.id})" class="button button-primary">📖 वाचा</button><button type="button" onclick="openStory(${story.id}, true)" class="button button-secondary">🔊 ऐका</button></div></article></div>`;
@@ -114,6 +116,18 @@ function storyCard(story) {
 function renderHome() {
   const last = getStory(state.lastStory) || stories[0]; const progress = stories.length ? Math.round(state.readStories.length / stories.length * 100) : 0;
   document.getElementById('app').innerHTML = `<main class="page-shell home-page"><section class="hero"><div class="hero-copy"><span class="eyebrow">🚩 मराठी कथा संग्रह</span><h1>शिवाजी महाराजांच्या<br><em>प्रेरणादायी कथा</em></h1><p>वाचा 📖 • ऐका 🔊 • शिका 🌟</p><div class="hero-stats"><span><strong>${stories.length}</strong> कथा</span><span><strong>🔊</strong> ऐकण्याची सुविधा</span><span><strong>🌟</strong> प्रेरणादायी शिकवण</span></div><button type="button" onclick="showPage('stories')" class="button button-light">कथा निवडा <span>→</span></button></div><div class="hero-emblem" aria-hidden="true">🚩</div></section><section class="continue-section"><div><span class="section-kicker">📖 पुढे वाचा</span><h2>${last.title}</h2><p>कथा ${last.id} / ${stories.length} · तुमचा वाचन प्रवास ${progress}% पूर्ण</p></div><button type="button" onclick="openStory(${last.id})" class="button button-primary">पुढे वाचा →</button></section><section class="progress-panel"><div><span>माझा वाचन प्रवास</span><strong>${state.readStories.length} / ${stories.length} कथा</strong></div><div class="progress-track"><span style="width:${progress}%"></span></div></section></main>`;
+}
+function enhanceHome() {
+  const home = document.querySelector('.home-page');
+  if (!home || home.querySelector('.home-greeting')) return;
+  const greeting = document.createElement('section');
+  greeting.className = 'home-greeting';
+  greeting.innerHTML = '<span class="section-kicker">नमस्कार 👋</span><h2>आजची गोष्ट ऐकूया का? 🎧</h2><p>तुमच्या मनाला धैर्य देणारी एक कथा निवडा.</p>';
+  home.prepend(greeting);
+  const categories = document.createElement('section');
+  categories.className = 'home-categories';
+  categories.innerHTML = `<span class="section-kicker">कथा प्रकार</span><div class="home-category-grid">${FILTERS.slice(1, 7).map(([id, label], index) => `<button type="button" class="home-category" onclick="setFilter('${id}'); showPage('stories')">${['🌟', '🚩', '🦁', '📚', '👧', '🏰'][index]} ${label}<span>कथा पाहा →</span></button>`).join('')}</div>`;
+  home.insertBefore(categories, home.querySelector('.continue-section'));
 }
 function renderStories() {
   const visible = currentFilter === 'favorites' ? stories.filter((story) => isSaved(story.id)) : filteredStories();
@@ -149,8 +163,8 @@ function syncAudioControls() {
 function markRead(id) { if (!state.readStories.includes(Number(id))) state.readStories.push(Number(id)); state.lastStory = Number(id); saveState(); }
 function toggleSave(id) { const value = Number(id); state.savedStories = isSaved(value) ? state.savedStories.filter((item) => item !== value) : [...state.savedStories, value]; saveState(); renderCurrentView(); }
 function setFilter(filter) { currentFilter = filter; currentSearch = ''; renderStories(); }
-function renderCurrentView() { const params = new URLSearchParams(location.search); if (params.get('story')) renderReader(Number(params.get('story')), true); else if (location.hash === '#stories') renderStories(); else if (location.hash === '#saved') { currentFilter = 'favorites'; renderStories(); } else renderHome(); }
-function showPage(page) { stopSpeech(); history.pushState({}, '', page === 'home' ? './' : `#${page}`); if (page === 'home') renderHome(); else renderStories(); }
+function renderCurrentView() { const params = new URLSearchParams(location.search); if (params.get('story')) renderReader(Number(params.get('story')), true); else if (location.hash === '#stories') renderStories(); else if (location.hash === '#saved') { currentFilter = 'favorites'; renderStories(); } else { renderHome(); enhanceHome(); } }
+function showPage(page) { stopSpeech(); history.pushState({}, '', page === 'home' ? './' : `#${page}`); if (page === 'home') { renderHome(); enhanceHome(); } else { if (page === 'saved') currentFilter = 'favorites'; renderStories(); } syncNavigation(); }
 function openStory(id, listen = false) { stopSpeech(); currentStoryId = Number(id); segments = []; segmentIndex = 0; history.pushState({}, '', `?story=${currentStoryId}`); markRead(currentStoryId); renderReader(currentStoryId); if (listen) window.setTimeout(playStory, 100); }
 function toggleTheme() { setTheme(state.theme === 'dark' ? 'reading' : 'dark'); }
 async function initializeApp() {
@@ -161,14 +175,14 @@ async function initializeApp() {
     stories = loaded.filter((story, index, list) => list.findIndex((item) => Number(item.id) === Number(story.id)) === index).slice(0, 150);
     if (!stories.length) throw new Error('empty stories');
     if (!getStory(state.lastStory)) state.lastStory = stories[0].id;
-    loadVoices(); renderCurrentView();
+    loadVoices(); renderCurrentView(); syncNavigation();
   } catch {
     document.getElementById('app').innerHTML = '<main class="page-shell"><section class="empty-state"><h1>कथा उघडता आली नाही</h1><p>कृपया internet connection तपासा आणि page पुन्हा उघडा.</p><button type="button" class="button button-primary" onclick="location.reload()">पुन्हा प्रयत्न करा</button></section></main>';
   }
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 window.showPage = showPage; window.openStory = openStory; window.toggleSave = toggleSave; window.toggleTheme = toggleTheme; window.setFilter = setFilter; window.playStory = playStory; window.pauseSpeech = pauseSpeech; window.resumeSpeech = resumeSpeech; window.stopSpeech = stopSpeech; window.previousSegment = previousSegment; window.nextSegment = nextSegment; window.setVolume = setVolume; window.setReadAlong = setReadAlong; window.setSpeed = setSpeed; window.setFontSize = setFontSize; window.setTheme = setTheme;
-window.addEventListener('popstate', renderCurrentView); window.addEventListener('beforeunload', saveAudioProgress); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveAudioProgress(); });
+window.addEventListener('popstate', () => { renderCurrentView(); syncNavigation(); }); window.addEventListener('beforeunload', saveAudioProgress); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveAudioProgress(); });
 document.addEventListener('click', (event) => {
   const button = event.target.closest?.('.audio-main-controls .round-control');
   if (!button) return;

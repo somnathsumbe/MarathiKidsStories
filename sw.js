@@ -1,4 +1,4 @@
-const CACHE_NAME = 'marathi-kids-stories-v10';
+const CACHE_NAME = 'marathi-kids-stories-v11';
 const APP_SHELL = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const APP_SHELL = [
   './manifest.json',
   './data/stories.json',
   './js/pwa-install.js',
+  './js/audio/speechEngine.js',
   './js/app.js',
   './icons/icon-192.png',
   './icons/icon-512.png'
