@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="mr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#7c3aed" />
+    <meta name="description" content="गोष्टींचं सुंदर जग - मराठी मुलांसाठी गोष्टी, बोध आणि वाचन आनंद." />
+    <title>गोष्टींचं सुंदर जग</title>
+
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="icon" href="./icons/icon-192.png" type="image/png" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+    </script>
+    <style>
+      html, body { margin: 0; padding: 0; }
+      .touch-target { min-height: 44px; min-width: 44px; }
+      .reader-text p { margin-bottom: 1.25rem; }
+    </style>
+  </head>
+
+  <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased">
+    <div id="networkStatus" class="fixed top-4 right-4 z-50 rounded-full bg-emerald-500 text-white px-3 py-1 text-xs shadow hidden"></div>
+    <div id="app" class="min-h-screen pb-24"></div>
+
+    <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 shadow-lg">
+      <div class="max-w-5xl mx-auto grid grid-cols-3 text-center">
+        <button type="button" onclick="showPage('home')" class="py-3 text-sm touch-target">
+          <div>🏠</div>
+          <div>मुख्यपृष्ठ</div>
+        </button>
+
+        <button type="button" onclick="showPage('stories')" class="py-3 text-sm touch-target">
+          <div>📖</div>
+          <div>गोष्टी</div>
+        </button>
+
+        <button type="button" onclick="showPage('saved')" class="py-3 text-sm touch-target">
+          <div>❤️</div>
+          <div>माझ्या गोष्टी</div>
+        </button>
+      </div>
+    </nav>
+
+    <script src="./js/app.js"></script>
+  </body>
+</html>
