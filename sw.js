@@ -1,4 +1,4 @@
-const CACHE_NAME = 'marathi-kids-stories-v14';
+const CACHE_NAME = 'marathi-kids-stories-v15';
 const APP_SHELL = [
   './',
   './index.html',
