@@ -4,10 +4,16 @@ const DEFAULT_STATE = {
   lastStory: 1, savedStories: [], readStories: [], darkMode: false, theme: 'reading', fontSize: 'medium', readAlong: true,
   audio: { voice: '', speed: 'medium', volume: 1 }, audioProgress: {}
 };
-const FILTERS = [['all', 'सर्व कथा'], ['बालपण', 'बालपण'], ['स्वराज्य', 'स्वराज्य'], ['किल्ले', 'किल्ले'], ['पराक्रम', 'पराक्रम'], ['नियोजन', 'नियोजन'], ['प्रशासन', 'प्रशासन'], ['प्रेरणा', 'प्रेरणा']];
+const COLLECTIONS = {
+  shivaji: { label: 'शिवाजी महाराज', file: './data/stories.json', filters: [['all', 'सर्व कथा'], ['बालपण', 'बालपण'], ['स्वराज्य', 'स्वराज्य'], ['किल्ले', 'किल्ले'], ['पराक्रम', 'पराक्रम'], ['नियोजन', 'नियोजन'], ['प्रशासन', 'प्रशासन'], ['प्रेरणा', 'प्रेरणा']] },
+  mahabharat: { label: 'महाभारत', file: './data/mahabharat.json', filters: [['all', 'सर्व कथा'], ['महाभारत', 'महाभारत'], ['पांडव', 'पांडव'], ['कौरव', 'कौरव'], ['कुरुवंश', 'कुरुवंश'], ['कुरुक्षेत्र युद्ध', 'कुरुक्षेत्र युद्ध'], ['श्रीकृष्ण', 'श्रीकृष्ण'], ['उपकथा', 'उपकथा']] },
+  ramayan: { label: 'रामायण', file: './data/ramayan.json', filters: [['all', 'सर्व कथा'], ['बालकांड', 'बालकांड'], ['अयोध्याकांड', 'अयोध्याकांड'], ['अरण्यकांड', 'अरण्यकांड'], ['किष्किंधाकांड', 'किष्किंधाकांड'], ['सुंदरकांड', 'सुंदरकांड'], ['युद्धकांड', 'युद्धकांड'], ['उत्तरकांड', 'उत्तरकांड']] },
+  gita: { label: 'भगवद्गीता अध्याय', file: './data/gita.json', filters: [['all', 'सर्व अध्याय'], ['अध्याय १', 'अध्याय १'], ['अध्याय २', 'अध्याय २'], ['अध्याय ३', 'अध्याय ३'], ['अध्याय ४', 'अध्याय ४'], ['अध्याय ५', 'अध्याय ५'], ['अध्याय ६', 'अध्याय ६'], ['अध्याय ७', 'अध्याय ७'], ['अध्याय ८', 'अध्याय ८'], ['अध्याय ९', 'अध्याय ९'], ['अध्याय १०', 'अध्याय १०'], ['अध्याय ११', 'अध्याय ११'], ['अध्याय १२', 'अध्याय १२'], ['अध्याय १३', 'अध्याय १३'], ['अध्याय १४', 'अध्याय १४'], ['अध्याय १५', 'अध्याय १५'], ['अध्याय १६', 'अध्याय १६'], ['अध्याय १७', 'अध्याय १७'], ['अध्याय १८', 'अध्याय १८']] }
+};
 const FONT_CLASSES = { small: 'reader-small', medium: 'reader-medium', large: 'reader-large' };
 
 let stories = [];
+let activeCollection = 'shivaji';
 let state = { ...DEFAULT_STATE, audio: { ...DEFAULT_STATE.audio }, audioProgress: {} };
 let currentStoryId = 1;
 let currentFilter = 'all';
@@ -31,13 +37,14 @@ function loadState() {
 }
 function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch { /* Continue without persistence when storage is blocked. */ } }
 function getStory(id) { return stories.find((story) => Number(story.id) === Number(id)) || stories[0]; }
+function collectionConfig() { return COLLECTIONS[activeCollection]; }
 function isSaved(id) { return state.savedStories.includes(Number(id)); }
 function isRead(id) { return state.readStories.includes(Number(id)); }
 function categoryMatches(story, filter) {
   if (filter === 'all') return true;
   const text = `${story.title} ${story.category}`;
-  const words = { बालपण: 'बालपण|जिजामाता', स्वराज्य: 'स्वराज्य|राज्याभिषेक', किल्ले: 'किल्ले|गड|रायगड|राजगड|सिंहगड|प्रतापगड|सिंधुदुर्ग', पराक्रम: 'पराक्रम|सरदार|मावळे|धैर्य|लढाई', नियोजन: 'नियोजन|रणनीती|बुद्धिमत्ता|आरमार', प्रशासन: 'प्रशासन|न्याय|प्रजा|शिस्त', प्रेरणा: 'प्रेरणा|गुण|मुलांसाठी' };
-  return new RegExp(words[filter] || filter).test(text);
+  const words = { बालपण: 'बालपण|जिजामाता', स्वराज्य: 'स्वराज्य|राज्याभिषेक', किल्ले: 'किल्ले|गड|रायगड|राजगड|सिंहगड|प्रतापगड|सिंधुदुर्ग', पराक्रम: 'पराक्रम|सरदार|मावळे|धैर्य|लढाई', नियोजन: 'नियोजन|रणनीती|बुद्धिमत्ता|आरमार', प्रशासन: 'प्रशासन|न्याय|प्रजा|शिस्त', प्रेरणा: 'प्रेरणा|गुण|मुलांसाठी', महाभारत: 'महाभारत', पांडव: 'पांडव', कौरव: 'कौरव', कुरुवंश: 'कुरुवंश', 'कुरुक्षेत्र युद्ध': 'कुरुक्षेत्र युद्ध', श्रीकृष्ण: 'श्रीकृष्ण', उपकथा: 'उपकथा' };
+  return new RegExp(words[filter] || filter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(text);
 }
 function filteredStories() { const term = currentSearch.toLowerCase(); return stories.filter((story) => categoryMatches(story, currentFilter) && (!term || `${story.title} ${story.category}`.toLowerCase().includes(term))); }
 function loadVoices() {
@@ -114,8 +121,9 @@ function storyCard(story) {
   return `<div class="col-12 col-sm-6 col-lg-4"><article class="story-card h-100"><div class="story-card-icon">${story.icon}</div><span class="story-category">${story.category}</span><h2>${story.title}</h2><p class="story-meta">📖 ${story.readTime} मिनिटे</p>${isRead(story.id) ? '<span class="complete-badge">✓ कथा पूर्ण</span>' : ''}<div class="story-card-actions"><button type="button" onclick="toggleSave(${story.id})" class="icon-button" aria-label="कथा आवडती करा">${isSaved(story.id) ? '♥' : '♡'}</button><button type="button" onclick="openStory(${story.id})" class="button button-primary">📖 वाचा</button><button type="button" onclick="openStory(${story.id}, true)" class="button button-secondary">🔊 ऐका</button></div></article></div>`;
 }
 function renderHome() {
-  const last = getStory(state.lastStory) || stories[0]; const progress = stories.length ? Math.round(state.readStories.length / stories.length * 100) : 0;
-  document.getElementById('app').innerHTML = `<main class="page-shell home-page"><section class="hero"><div class="hero-copy"><span class="eyebrow">🚩 मराठी कथा संग्रह</span><h1>शिवाजी महाराजांच्या<br><em>प्रेरणादायी कथा</em></h1><p>वाचा 📖 • ऐका 🔊 • शिका 🌟</p><div class="hero-stats"><span><strong>${stories.length}</strong> कथा</span><span><strong>🔊</strong> ऐकण्याची सुविधा</span><span><strong>🌟</strong> प्रेरणादायी शिकवण</span></div><button type="button" onclick="showPage('stories')" class="button button-light">कथा निवडा <span>→</span></button></div><div class="hero-emblem" aria-hidden="true">🚩</div></section><section class="continue-section"><div><span class="section-kicker">📖 पुढे वाचा</span><h2>${last.title}</h2><p>कथा ${last.id} / ${stories.length} · तुमचा वाचन प्रवास ${progress}% पूर्ण</p></div><button type="button" onclick="openStory(${last.id})" class="button button-primary">पुढे वाचा →</button></section><section class="progress-panel"><div><span>माझा वाचन प्रवास</span><strong>${state.readStories.length} / ${stories.length} कथा</strong></div><div class="progress-track"><span style="width:${progress}%"></span></div></section></main>`;
+  if (!stories.length) { document.getElementById('app').innerHTML = '<main class="page-shell"><section class="empty-state"><h1>या संग्रहात कथा उपलब्ध नाहीत.</h1><button type="button" class="button button-primary" onclick="showCollection(\'shivaji\')">शिवाजी महाराज कथा उघडा</button></section></main>'; return; }
+  const last = getStory(state.lastStory) || stories[0]; const progress = stories.length ? Math.round(state.readStories.length / stories.length * 100) : 0; const config = collectionConfig();
+  document.getElementById('app').innerHTML = `<main class="page-shell home-page"><section class="hero"><div class="hero-copy"><span class="eyebrow">📖 मराठी कथा संग्रह</span><h1>${config.label}च्या<br><em>प्रेरणादायी कथा</em></h1><p>वाचा 📖 • ऐका 🔊 • शिका 🌟</p><div class="hero-stats"><span><strong>${stories.length}</strong> कथा</span><span><strong>🔊</strong> ऐकण्याची सुविधा</span><span><strong>🌟</strong> प्रेरणादायी शिकवण</span></div><button type="button" onclick="showPage('stories')" class="button button-light">कथा निवडा <span>→</span></button></div><div class="hero-emblem" aria-hidden="true">📖</div></section><section class="continue-section"><div><span class="section-kicker">📖 पुढे वाचा</span><h2>${last.title}</h2><p>कथा ${last.id} / ${stories.length} · तुमचा वाचन प्रवास ${progress}% पूर्ण</p></div><button type="button" onclick="openStory(${last.id})" class="button button-primary">पुढे वाचा →</button></section><section class="progress-panel"><div><span>माझा वाचन प्रवास</span><strong>${state.readStories.length} / ${stories.length} कथा</strong></div><div class="progress-track"><span style="width:${progress}%"></span></div></section></main>`;
 }
 function enhanceHome() {
   const home = document.querySelector('.home-page');
@@ -126,12 +134,14 @@ function enhanceHome() {
   home.prepend(greeting);
   const categories = document.createElement('section');
   categories.className = 'home-categories';
-  categories.innerHTML = `<span class="section-kicker">कथा प्रकार</span><div class="home-category-grid">${FILTERS.slice(1, 7).map(([id, label], index) => `<button type="button" class="home-category" onclick="setFilter('${id}'); showPage('stories')">${['🌟', '🚩', '🦁', '📚', '👧', '🏰'][index]} ${label}<span>कथा पाहा →</span></button>`).join('')}</div>`;
+  const filters = collectionConfig().filters;
+  categories.innerHTML = `<span class="section-kicker">कथा प्रकार</span><div class="home-category-grid">${filters.slice(1, 7).map(([id, label], index) => `<button type="button" class="home-category" onclick="setFilter('${id}'); showPage('stories')">${['🌟', '🚩', '🦁', '📚', '👧', '🏰'][index]} ${label}<span>कथा पाहा →</span></button>`).join('')}</div>`;
   home.insertBefore(categories, home.querySelector('.continue-section'));
 }
 function renderStories() {
   const visible = currentFilter === 'favorites' ? stories.filter((story) => isSaved(story.id)) : filteredStories();
-  document.getElementById('app').innerHTML = `<main class="page-shell stories-page"><header class="page-heading"><div><span class="eyebrow">📚 कथा निवडा</span><h1>शिवाजी महाराजांच्या कथा</h1><p>प्रत्येक कथेत एक सुंदर विचार आणि एक नवे स्वप्न.</p></div><button type="button" onclick="toggleTheme()" class="theme-button" aria-label="थीम बदला">${state.theme === 'dark' ? '☀️' : '🌙'}</button></header><div class="story-tools"><label class="search-box">🔎<input id="storySearch" placeholder="कथा शोधा..." value="${currentSearch}" aria-label="कथा शोधा"></label><div class="filter-row">${FILTERS.map(([id, label]) => `<button type="button" onclick="setFilter('${id}')" class="filter-button ${currentFilter === id ? 'active' : ''}">${label}</button>`).join('')}<button type="button" onclick="setFilter('favorites')" class="filter-button ${currentFilter === 'favorites' ? 'active' : ''}">♥ आवडत्या</button></div></div><div class="row g-4">${visible.map(storyCard).join('')}</div>${!visible.length ? '<div class="empty-state">ही कथा यादी अजून रिकामी आहे.</div>' : ''}</main>`;
+  const config = collectionConfig();
+  document.getElementById('app').innerHTML = `<main class="page-shell stories-page"><header class="page-heading"><div><span class="eyebrow">📚 कथा निवडा</span><h1>${config.label} कथा</h1><p>कथेच्या title वरून कथा ओळखा, उघडा आणि ऐका.</p></div><button type="button" onclick="toggleTheme()" class="theme-button" aria-label="थीम बदला">${state.theme === 'dark' ? '☀️' : '🌙'}</button></header><div class="collection-tabs">${Object.entries(COLLECTIONS).map(([id, item]) => `<button type="button" onclick="showCollection('${id}')" class="filter-button ${activeCollection === id ? 'active' : ''}">${item.label}</button>`).join('')}</div><div class="story-tools"><label class="search-box">🔎<input id="storySearch" placeholder="कथा title शोधा..." value="${currentSearch}" aria-label="कथा title शोधा"></label><div class="filter-row">${config.filters.map(([id, label]) => `<button type="button" onclick="setFilter('${id}')" class="filter-button ${currentFilter === id ? 'active' : ''}">${label}</button>`).join('')}<button type="button" onclick="setFilter('favorites')" class="filter-button ${currentFilter === 'favorites' ? 'active' : ''}">♥ आवडत्या</button></div></div><div class="row g-4">${visible.map(storyCard).join('')}</div>${!visible.length ? '<div class="empty-state">या संग्रहात कथा उपलब्ध नाहीत. JSON फाइलमध्ये कथा जोडा.</div>' : ''}</main>`;
   document.getElementById('storySearch').addEventListener('input', (event) => { currentSearch = event.target.value; renderStories(); });
 }
 function renderReader(id, preserve = false) {
@@ -163,6 +173,16 @@ function syncAudioControls() {
 function markRead(id) { if (!state.readStories.includes(Number(id))) state.readStories.push(Number(id)); state.lastStory = Number(id); saveState(); }
 function toggleSave(id) { const value = Number(id); state.savedStories = isSaved(value) ? state.savedStories.filter((item) => item !== value) : [...state.savedStories, value]; saveState(); renderCurrentView(); }
 function setFilter(filter) { currentFilter = filter; currentSearch = ''; renderStories(); }
+async function showCollection(collection) {
+  if (!COLLECTIONS[collection] || collection === activeCollection && stories.length) { renderStories(); return; }
+  stopSpeech(); activeCollection = collection; currentFilter = 'all'; currentSearch = ''; stories = [];
+  try {
+    const response = await fetch(COLLECTIONS[collection].file); if (!response.ok) throw new Error('collection unavailable');
+    const loaded = await response.json(); if (!Array.isArray(loaded)) throw new Error('invalid collection');
+    stories = loaded.filter((story, index, list) => list.findIndex((item) => Number(item.id) === Number(story.id)) === index);
+    renderStories();
+  } catch { renderStories(); }
+}
 function renderCurrentView() { const params = new URLSearchParams(location.search); if (params.get('story')) renderReader(Number(params.get('story')), true); else if (location.hash === '#stories') renderStories(); else if (location.hash === '#saved') { currentFilter = 'favorites'; renderStories(); } else { renderHome(); enhanceHome(); } }
 function showPage(page) { stopSpeech(); history.pushState({}, '', page === 'home' ? './' : `#${page}`); if (page === 'home') { renderHome(); enhanceHome(); } else { if (page === 'saved') currentFilter = 'favorites'; renderStories(); } syncNavigation(); }
 function openStory(id, listen = false) { stopSpeech(); currentStoryId = Number(id); segments = []; segmentIndex = 0; history.pushState({}, '', `?story=${currentStoryId}`); markRead(currentStoryId); renderReader(currentStoryId); if (listen) window.setTimeout(playStory, 100); }
@@ -172,7 +192,7 @@ async function initializeApp() {
   try {
     const response = await fetch('./data/stories.json'); if (!response.ok) throw new Error('stories unavailable');
     const loaded = await response.json(); if (!Array.isArray(loaded)) throw new Error('invalid stories');
-    stories = loaded.filter((story, index, list) => list.findIndex((item) => Number(item.id) === Number(story.id)) === index).slice(0, 150);
+    stories = loaded.filter((story, index, list) => list.findIndex((item) => Number(item.id) === Number(story.id)) === index);
     if (!stories.length) throw new Error('empty stories');
     if (!getStory(state.lastStory)) state.lastStory = stories[0].id;
     loadVoices(); renderCurrentView(); syncNavigation();
@@ -181,7 +201,7 @@ async function initializeApp() {
   }
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
-window.showPage = showPage; window.openStory = openStory; window.toggleSave = toggleSave; window.toggleTheme = toggleTheme; window.setFilter = setFilter; window.playStory = playStory; window.pauseSpeech = pauseSpeech; window.resumeSpeech = resumeSpeech; window.stopSpeech = stopSpeech; window.previousSegment = previousSegment; window.nextSegment = nextSegment; window.setVolume = setVolume; window.setReadAlong = setReadAlong; window.setSpeed = setSpeed; window.setFontSize = setFontSize; window.setTheme = setTheme;
+window.showPage = showPage; window.openStory = openStory; window.toggleSave = toggleSave; window.toggleTheme = toggleTheme; window.setFilter = setFilter; window.showCollection = showCollection; window.playStory = playStory; window.pauseSpeech = pauseSpeech; window.resumeSpeech = resumeSpeech; window.stopSpeech = stopSpeech; window.previousSegment = previousSegment; window.nextSegment = nextSegment; window.setVolume = setVolume; window.setReadAlong = setReadAlong; window.setSpeed = setSpeed; window.setFontSize = setFontSize; window.setTheme = setTheme;
 window.addEventListener('popstate', () => { renderCurrentView(); syncNavigation(); }); window.addEventListener('beforeunload', saveAudioProgress); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveAudioProgress(); });
 document.addEventListener('click', (event) => {
   const button = event.target.closest?.('.audio-main-controls .round-control');

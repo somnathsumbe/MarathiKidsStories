@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="मराठी गोष्टी" />
     <meta name="description" content="गोष्टींचं सुंदर जग - मराठी मुलांसाठी गोष्टी, बोध आणि वाचन आनंद." />
-    <title>शिवाजी महाराजांच्या प्रेरणादायी कथा</title>
+    <title>मराठी कथा संग्रह</title>
 
     <link rel="manifest" href="./manifest.json" />
     <link rel="icon" href="./icons/icon-192.png" type="image/png" />
@@ -61,6 +61,7 @@
       .page-heading h1 { margin:8px 0; font-size:2.4rem; }
       .theme-button, .reader-favorite, .icon-button { border:0; background:transparent; color:var(--saffron); min-width:48px; min-height:48px; font-size:1.6rem; }
       .story-tools { display:flex; gap:16px; align-items:center; margin-bottom:28px; }
+      .collection-tabs { display:flex; gap:8px; margin-bottom:18px; overflow:auto; padding-bottom:4px; }
       .search-box { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:0 14px; min-height:48px; flex:0 1 300px; }
       .search-box input { border:0; outline:0; background:transparent; color:var(--ink); width:100%; }
       .filter-row { display:flex; gap:8px; overflow:auto; padding-bottom:4px; }
@@ -75,7 +76,7 @@
       .complete-badge { color:var(--teal); font-size:.85rem; font-weight:700; margin-bottom:12px; }
       .story-card-actions { margin-top:auto; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
       .story-card-actions .button { flex:1; padding-inline:10px; }
-      .row { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:24px; }
+      .row { display:grid; grid-template-columns:1fr; gap:18px; }
       .empty-state { padding:50px; text-align:center; color:var(--muted); }
       .reader-page { min-height:100dvh; padding:18px 0 70px; background:var(--paper); }
       .reader-top { width:min(900px, calc(100% - 32px)); margin:0 auto 24px; display:flex; justify-content:space-between; align-items:center; }
@@ -147,8 +148,7 @@
       .install-button { border:0; padding:8px 14px; background:var(--saffron); color:#fff; }
       .install-later { border:1px solid var(--line); padding:8px 14px; background:transparent; color:var(--ink); }
       .install-close { border:0; padding:0 10px; background:transparent; color:var(--muted); font-size:1.5rem; line-height:1; }
-      @media (min-width:701px) { .install-banner { left:auto; width:min(390px, calc(100% - 24px)); } }
-      @media (min-width:701px) { .row { grid-template-columns:1fr; } }
+      @media (min-width:701px) { .install-banner { left:auto; width:min(390px, calc(100% - 24px)); } .row { grid-template-columns:repeat(3, minmax(0, 1fr)); gap:24px; } }
       .home-greeting, .home-categories { margin-bottom:18px; }
       .home-greeting h2 { margin:4px 0; font-size:1.55rem; }
       .home-greeting p { color:var(--muted); margin:0; }

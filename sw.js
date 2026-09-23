@@ -1,10 +1,13 @@
-const CACHE_NAME = 'marathi-kids-stories-v11';
+const CACHE_NAME = 'marathi-kids-stories-v12';
 const APP_SHELL = [
   './',
   './index.html',
   './offline.html',
   './manifest.json',
   './data/stories.json',
+  './data/mahabharat.json',
+  './data/ramayan.json',
+  './data/gita.json',
   './js/pwa-install.js',
   './js/audio/speechEngine.js',
   './js/app.js',
@@ -34,7 +37,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(fetch(event.request).catch(async () => (await caches.match('./', { ignoreSearch: true })) || caches.match('./offline.html')));
     return;
   }
-  if (requestUrl.pathname.endsWith('/data/stories.json')) {
+  if (requestUrl.pathname.includes('/data/') && requestUrl.pathname.endsWith('.json')) {
     event.respondWith(networkFirst(event.request));
     return;
   }
