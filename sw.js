@@ -1,13 +1,9 @@
-const CACHE_NAME = 'marathi-kids-stories-v13';
+const CACHE_NAME = 'marathi-kids-stories-v14';
 const APP_SHELL = [
   './',
   './index.html',
   './offline.html',
   './manifest.json',
-  './data/stories.json',
-  './data/mahabharat.json',
-  './data/ramayan.json',
-  './data/gita.json',
   './js/pwa-install.js',
   './js/audio/speechEngine.js',
   './js/app.js',
